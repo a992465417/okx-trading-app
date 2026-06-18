@@ -1,0 +1,54 @@
+#:kivy 2.0
+#:set DARK [0.12,0.12,0.14,1]
+#:set CARD [0.18,0.18,0.22,1]
+
+<ConfigScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 12; spacing: 8
+        canvas.before: Color; rgba: DARK; Rectangle; pos:self.pos; size:self.size
+        Label:text:'⚙️ CONFIG';font_size:20;bold:True;size_hint_y:None;height:44;color:[0.9,0.9,0.95,1]
+        ScrollView:
+            BoxLayout: orientation:'vertical'; size_hint_y:None; height:self.minimum_height; spacing:6; padding:[0,0,0,8]
+            BoxLayout: orientation:'vertical'; padding:8; spacing:4; size_hint_y:None; height:600
+                Label:text:'🔑 API';bold:True;font_size:15;color:[0.1,0.53,1,1]
+                ConfigRow: label:'API Key'; wgt:txt_ak
+                ConfigRow: label:'Secret'; wgt:txt_as
+                ConfigRow: label:'Passphrase'; wgt:txt_ap
+                Label:text:'📊 Params';bold:True;font_size:15;color:[0.1,0.53,1,1]
+                ConfigRow: label:'Symbol'; wgt:txt_sym
+                ConfigRow: label:'Leverage'; wgt:txt_lv
+                ConfigRow: label:'Base Size'; wgt:txt_bp
+                BoxLayout: size_hint_y:None; height:52; spacing:12; padding:[0,12,0,0]
+                    Button:text:'💾 SAVE & START';font_size:15;bold:True;background_color:[0.15,0.75,0.15,1];color:[1,1,1,1];on_release:app.save_and_start()
+                    Button:text:'↩ BACK';font_size:15;background_color:[0.3,0.3,0.35,1];color:[1,1,1,1];on_release:setattr(app.root,'current','main')
+
+<MainScreen>:
+    BoxLayout: orientation:'vertical'; padding:6; spacing:4
+        canvas.before: Color; rgba: DARK; Rectangle; pos:self.pos; size:self.size
+        BoxLayout: size_hint_y:None; height:44; spacing:6
+            canvas.before: Color; rgba: CARD; Rectangle; pos:self.pos; size:self.size
+            Label:id:lbl_price; text:'ETH: --'; font_size:18; bold:True; color:[1,1,1,1]
+            Button:text:'▶ START';font_size:14;bold:True;size_hint_x:0.3;background_color:[0.15,0.75,0.15,1];color:[1,1,1,1];on_release:app.toggle_bot()
+        BoxLayout: size_hint_y:None; height:100; spacing:6
+            CardBox:
+                Label:id:lbl_long; text:'LONG: --'; font_size:13; color:[0.15,0.75,0.15,1]; halign:'left'; valign:'middle'
+            CardBox:
+                Label:id:lbl_short; text:'SHORT: --'; font_size:13; color:[0.9,0.2,0.2,1]; halign:'left'; valign:'middle'
+            CardBox:
+                Label:id:lbl_total; text:'P&L: --'; font_size:13; color:[0.9,0.9,0.9,1]; halign:'left'; valign:'middle'
+        BoxLayout: orientation:'vertical'
+            Label:text:'📋 LOG';font_size:12;bold:True;size_hint_y:None;height:20;color:[0.7,0.7,0.8,1]
+            ScrollView:
+                Label:id:lbl_log; text:'Ready...'; font_size:10; color:[0.7,0.75,0.8,1]; halign:'left'; valign:'top'; text_size:self.width-10,None; size_hint_y:None; height:self.minimum_height
+        BoxLayout: size_hint_y:None; height:48; spacing:8; padding:[4,4]
+            Button:text:'🔴 CLOSE ALL';font_size:13;bold:True;background_color:[0.9,0.2,0.2,1];color:[1,1,1,1];on_release:app.close_all()
+            Button:text:'⚙️ CONFIG';font_size:13;background_color:[0.3,0.3,0.35,1];color:[1,1,1,1];on_release:app.switch_to_config()
+            Button:text:'✕ EXIT';font_size:13;background_color:[0.2,0.2,0.22,1];color:[0.7,0.7,0.7,1];on_release:app.exit_app()
+
+<CardBox@BoxLayout>:
+    canvas.before: Color; rgba: CARD; RoundedRectangle; pos:self.pos; size:self.size; radius:[8,]
+<ConfigRow@BoxLayout>:
+    label:''; wgt:None; size_hint_y:None; height:36; spacing:8
+    Label:text:root.label; size_hint_x:0.35; halign:'right'; color:[0.7,0.7,0.8,1]; text_size:self.width,self.height; valign:'middle'
+    TextInput:id:root.wgt.id if root.wgt else ''; size_hint_x:0.65; multiline:False; font_size:13; padding:[6,6]; background_color:[0.12,0.12,0.15,1]; foreground_color:[0.9,0.9,0.95,1]
