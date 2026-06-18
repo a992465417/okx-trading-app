@@ -1,0 +1,59 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ♻️ 缓存
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            ~/.ccache
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+
+      - name: 📦 安装依赖
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3-pip python3-venv openjdk-17-jdk-headless git curl unzip autoconf automake libtool ccache pkg-config
+          pip3 install --user --upgrade pip buildozer cython setuptools wheel
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: 🏗️ 编译 APK
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          echo "y" | buildozer android debug 2>&1 | tee build.log
+          # 用 PIPESTATUS 检查 buildozer 是否成功
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "❌ Buildozer 失败!"
+            exit 1
+          fi
+          echo "✅ Buildozer 成功!"
+          echo "=== 检查 APK ==="
+          find . -name "*.apk" 2>/dev/null
+          ls -la bin/ 2>/dev/null || echo "bin 不存在"
+
+      - name: 📤 上传 APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: OKX-Trader-APK
+          path: |
+            ./bin/*.apk
+            ./*.apk
+          if-no-files-found: warn
+
+      - name: 📤 上传日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Logs
+          path: build.log
+          if-no-files-found: warn
