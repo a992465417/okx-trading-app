@@ -6,7 +6,7 @@ package.domain = com.okx.trader
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0.0
-requirements = python3,kivy,requests
+requirements = python3,kivy==2.3.0,requests
 android.archs = arm64-v8a
 android.api = 35
 android.minapi = 26
