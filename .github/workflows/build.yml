@@ -44,12 +44,16 @@ jobs:
       - name: 📤 上传 APK（广泛搜索）
         if: success()
         run: |
-          APK=$(find . -name "*.apk" -type f 2>/dev/null | head -1)
+          APK=$(find /home/runner/work/okx-trading-app -name "*.apk" -type f 2>/dev/null | head -1)
           if [ -z "$APK" ]; then
-            APK=$(find /home/runner -name "*.apk" -type f 2>/dev/null | head -1)
+            APK=$(find / -name "*.apk" -type f 2>/dev/null | head -1)
           fi
           if [ -z "$APK" ]; then
             echo "❌ 没找到任何 APK!"
+            ls -la /home/runner/work/okx-trading-app/okx-trading-app/bin/ 2>/dev/null || echo "bin 不存在"
+            ls -la /home/runner/work/okx-trading-app/okx-trading-app/ 2>/dev/null | head -10
+            # 搜索任何可能的位置
+            find /home/runner -maxdepth 5 -name "*.apk" -o -name "*.aab" 2>/dev/null | head -10
             exit 1
           fi
           echo "✅ 找到 APK: $APK"
