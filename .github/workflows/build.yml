@@ -30,25 +30,38 @@ jobs:
         run: |
           export PATH="$HOME/.local/bin:$PATH"
           echo "y" | buildozer android debug 2>&1 | tee build.log
-          # 用 PIPESTATUS 检查 buildozer 是否成功
           if [ ${PIPESTATUS[0]} -ne 0 ]; then
             echo "❌ Buildozer 失败!"
             exit 1
           fi
           echo "✅ Buildozer 成功!"
-          echo "=== 检查 APK ==="
-          find . -name "*.apk" 2>/dev/null
-          ls -la bin/ 2>/dev/null || echo "bin 不存在"
+          echo "=== 搜索 APK ==="
+          find . -name "*.apk" -type f 2>/dev/null
+          find .buildozer -name "*.apk" -type f 2>/dev/null
+          find /home/runner -name "*.apk" -type f 2>/dev/null
+          find / -name "*.apk" -type f 2>/dev/null | head -20
 
-      - name: 📤 上传 APK
+      - name: 📤 上传 APK（广泛搜索）
         if: success()
+        run: |
+          APK=$(find . -name "*.apk" -type f 2>/dev/null | head -1)
+          if [ -z "$APK" ]; then
+            APK=$(find /home/runner -name "*.apk" -type f 2>/dev/null | head -1)
+          fi
+          if [ -z "$APK" ]; then
+            echo "❌ 没找到任何 APK!"
+            exit 1
+          fi
+          echo "✅ 找到 APK: $APK"
+          echo "APK_PATH=$APK" >> $GITHUB_ENV
+
+      - name: 📤 上传 APK 产物
+        if: success() && env.APK_PATH != ''
         uses: actions/upload-artifact@v4
         with:
           name: OKX-Trader-APK
-          path: |
-            ./bin/*.apk
-            ./*.apk
-          if-no-files-found: warn
+          path: ${{ env.APK_PATH }}
+          if-no-files-found: error
 
       - name: 📤 上传日志
         if: always()
